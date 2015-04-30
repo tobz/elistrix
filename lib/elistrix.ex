@@ -1,18 +1,19 @@
 defmodule Elistrix do
   use Application
 
-  # See http://elixir-lang.org/docs/stable/elixir/Application.html
-  # for more information on OTP Applications
+  @metrics_name Elistrix.Metrics
+  @runner_sup_name Elistrix.Runner.Supervisor
+  @runner_name Elistrix.Runner
+
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
-      # Define workers and child supervisors to be supervised
-      # worker(Elistrix.Worker, [arg1, arg2, arg3])
+      worker(Elistrix.Metrics, [[name: @metrics_name]]),
+      supervisor(Elistrix.Runner.Supervisor, [[name: @runner_sup_name]]),
+      worker(Elistrix.Runner, [@metrics_name, @runner_sup_name, [name: @runner_name]])
     ]
 
-    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Elistrix.Supervisor]
     Supervisor.start_link(children, opts)
   end
