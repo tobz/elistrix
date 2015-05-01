@@ -1,15 +1,24 @@
 defmodule Elistrix.Dispatcher do
   use GenServer
 
+  @default_threshold %Elistrix.Thresholds{}
+
   def start_link(metrics, opts \\ []) do
     GenServer.start_link(__MODULE__, metrics, opts)
   end
 
   def init(metrics) do
-    {:ok, %{metrics: metrics, functions: %{}}}
+    {:ok, %{:functions => %{}, :metrics => metrics}}
   end
 
-  def handle_call({:register, fun_name, fun, threshold_config}, _from, state) do
+  def handle_call({:register, fun_name, fun, thresholds}, _from, state) do
+    case Map.has_key?(state.functions) do
+      true -> {:reply, :already_exists, state}
+      false ->
+        runner = %Elistrix.Runner{fun: fun, thresholds: thresholds}
+        state = update_in(state, [:functions, fun_name], runner)
+        {:reply, :ok, state}
+    end
   end
 
   def handle_call({:run, fun_name}, _from, state) do
@@ -23,8 +32,8 @@ defmodule Elistrix.Dispatcher do
     {:noreply, mark_call_error(state, fun_name, delta)}
   end
 
-  def register(fun_name, fun, threshold_config) do
-    GenServer.call(__MODULE__, {:register, fun_name, fun, threshold_config})
+  def register(fun_name, fun, thresholds \\ @default_threshold) do
+    GenServer.call(__MODULE__, {:register, fun_name, fun, thresholds})
   end
 
   def run(fun_name, args \\ []) when is_list(args) do
