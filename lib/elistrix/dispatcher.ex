@@ -9,7 +9,7 @@ defmodule Elistrix.Dispatcher do
     {:ok, %{metrics: metrics, functions: %{}}}
   end
 
-  def handle_call({:register, fun_name, fun}, _from, state) do
+  def handle_call({:register, fun_name, fun, threshold_config}, _from, state) do
   end
 
   def handle_call({:run, fun_name}, _from, state) do
@@ -23,16 +23,16 @@ defmodule Elistrix.Dispatcher do
     {:noreply, mark_call_error(state, fun_name, delta)}
   end
 
-  def register(fun_name, fun) do
-    GenServer.call(__MODULE__, {:register, fun_name, fun})
+  def register(fun_name, fun, threshold_config) do
+    GenServer.call(__MODULE__, {:register, fun_name, fun, threshold_config})
   end
 
   def run(fun_name, args \\ []) when is_list(args) do
     case get_runner(fun_name) do
       {:ok, run_fun} ->
-        start = get_time
+        start = get_time_msecs
         result = apply(run_fun, args)
-        delta = get_time - start
+        delta = get_time_msecs - start
 
         case result do
           :error -> track_error(fun_name, delta)
@@ -47,7 +47,11 @@ defmodule Elistrix.Dispatcher do
   end
 
   defp get_time do
-    Timex.Time.now(:usecs)
+    Timex.Time.now(:secs)
+  end
+
+  defp get_time_msecs do
+    Timex.Time.now(:msecs)
   end
 
   defp get_runner(fun_name) do
@@ -67,18 +71,36 @@ defmodule Elistrix.Dispatcher do
   end
 
   defp mark_call_ok(state, fun_name, delta) do
-    fun = get_in(state, [:functions, fun_name])
-    case fun do
+    fun_def = get_in(state, [:functions, fun_name])
+    case fun_def do
       nil -> state
-      _ -> state
+      _ ->
+        requests = fun_def.requests ++ [{:ok, get_time, fun_name, delta}]
+        |> prune_requests(fun_def.threshold_config)
+        update_in(state, [:functions, fun_name, :requests], requests)
     end
   end
 
   defp mark_call_error(state, fun_name, delta) do
-    fun = get_in(state, [:functions, fun_name])
-    case fun do
+    fun_def = get_in(state, [:functions, fun_name])
+    case fun_def do
       nil -> state
-      _ -> state
+      _ ->
+        requests = fun_def.requests ++ [{:error, get_time, fun_name, delta}]
+        |> prune_requests(fun_def.threshold_config)
+        update_in(state, [:functions, fun_name, :requests], requests)
+    end
+  end
+
+  defp prune_requests(requests, threshold_config) do
+    ts = get_time - threshold_config.window_length
+    _prune_requests(requests, ts)
+  end
+
+  defp _prune_requests(requests, ts) do
+    case requests do
+      [{_, rts, _, _} | tail] when rts < ts -> _prune_requests(tail, ts)
+      _ -> requests
     end
   end
 end
