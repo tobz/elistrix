@@ -23,12 +23,12 @@ defmodule Elistrix.Dispatcher do
 
   def handle_call({:run, cmd_name}, _from, state) do
     case Map.has_key?(state.commands, cmd_name) do
-      false -> :does_not_exist
+      false -> {:reply, :does_not_exist, state}
       true ->
         cmd = state.commands[cmd_name]
         case get_command_status(cmd) do
-          {:tripped, reason} -> {:tripped, reason}
-          :ok -> {:ok, cmd}
+          {:tripped, reason} -> {:reply, {:tripped, reason}, state}
+          :ok -> {:reply, {:ok, cmd}, state}
         end
     end
   end
