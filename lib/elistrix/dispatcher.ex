@@ -12,11 +12,11 @@ defmodule Elistrix.Dispatcher do
   end
 
   def handle_call({:register, fun_name, fun, thresholds}, _from, state) do
-    case Map.has_key?(state.functions) do
+    case Map.has_key?(state.functions, fun_name) do
       true -> {:reply, :already_exists, state}
       false ->
         runner = %Elistrix.Runner{fun: fun, thresholds: thresholds}
-        state = update_in(state, [:functions, fun_name], runner)
+        state = put_in(state, [:functions, fun_name], runner)
         {:reply, :ok, state}
     end
   end
@@ -30,6 +30,14 @@ defmodule Elistrix.Dispatcher do
 
   def handle_cast({:track, :error, fun_name, delta}, state) do
     {:noreply, mark_call_error(state, fun_name, delta)}
+  end
+
+  def handle_call(:stop, _from, state) do
+    {:stop, :normal, :ok, state}
+  end
+
+  def stop do
+    GenServer.call(__MODULE__, :stop)
   end
 
   def register(fun_name, fun, thresholds \\ @default_threshold) do
