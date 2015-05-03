@@ -1,3 +1,3 @@
 defmodule Elistrix.Command do
-  defstruct fun: nil, thresholds: %Elistrix.Thresholds{}, requests: []
+  defstruct fun: nil, tripped: false, thresholds: %Elistrix.Thresholds{}, requests: []
 end

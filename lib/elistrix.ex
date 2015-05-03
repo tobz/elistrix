@@ -8,8 +8,7 @@ defmodule Elistrix do
     import Supervisor.Spec, warn: false
 
     children = [
-      worker(Elistrix.Metrics, [[name: @metrics_name]]),
-      worker(Elistrix.Dispatcher, [@metrics_name, [name: @dispatcher_name]])
+      worker(Elistrix.Dispatcher, [[name: @dispatcher_name]])
     ]
 
     opts = [strategy: :one_for_one, name: Elistrix.Supervisor]

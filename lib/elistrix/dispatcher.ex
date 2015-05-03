@@ -3,12 +3,12 @@ defmodule Elistrix.Dispatcher do
 
   @default_threshold %Elistrix.Thresholds{}
 
-  def start_link(metrics, opts \\ []) do
-    GenServer.start_link(__MODULE__, metrics, opts)
+  def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, :ok, opts)
   end
 
-  def init(metrics) do
-    {:ok, %{:commands => %{}, :metrics => metrics}}
+  def init(:ok) do
+    {:ok, %{:commands => %{}}}
   end
 
   def handle_call(:stop, _from, state) do
@@ -31,8 +31,16 @@ defmodule Elistrix.Dispatcher do
       true ->
         cmd = state.commands[cmd_name]
         case get_command_status(cmd) do
-          {:tripped, reason} -> {:reply, {:tripped, reason}, state}
-          :ok -> {:reply, {:ok, cmd}, state}
+          {:tripped, reason} ->
+            cmd = %{cmd | :tripped => true}
+            put_in(state, [:commands, cmd_name], cmd)
+
+            {:reply, {:tripped, reason}, state}
+          :ok ->
+            cmd = %{cmd | :tripped => false}
+            put_in(state, [:commands, cmd_name], cmd)
+
+            {:reply, {:ok, cmd}, state}
         end
     end
   end
@@ -105,7 +113,17 @@ defmodule Elistrix.Dispatcher do
       _ ->
         avg_latency = latency_total / request_count
         error_percentage = error_count / request_count
-        :ok
+
+        result = :ok
+        if avg_latency > cmd.thresholds.latency_threshold do
+          result = {:tripped, "exceeded latency threshold"}
+        end
+
+        if error_percentage > cmd.thresholds.error_threshold do
+          result = {:tripped, "exceeded error threshold"}
+        end
+
+        result
     end
   end
 
