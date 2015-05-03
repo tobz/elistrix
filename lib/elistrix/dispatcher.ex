@@ -11,6 +11,10 @@ defmodule Elistrix.Dispatcher do
     {:ok, %{:commands => %{}, :metrics => metrics}}
   end
 
+  def handle_call(:stop, _from, state) do
+    {:stop, :normal, :ok, state}
+  end
+
   def handle_call({:register, cmd_name, fun, thresholds}, _from, state) do
     case Map.has_key?(state.commands, cmd_name) do
       true -> {:reply, :already_exists, state}
@@ -39,10 +43,6 @@ defmodule Elistrix.Dispatcher do
 
   def handle_cast({:track, :error, cmd_name, delta}, state) do
     {:noreply, mark_call_error(state, cmd_name, delta)}
-  end
-
-  def handle_call(:stop, _from, state) do
-    {:stop, :normal, :ok, state}
   end
 
   def stop do
@@ -84,7 +84,7 @@ defmodule Elistrix.Dispatcher do
     GenServer.call(__MODULE__, {:run, cmd_name})
   end
 
-  defp get_command_status(cmd) do
+  defp get_command_status(_cmd) do
     :ok
   end
 
@@ -107,7 +107,9 @@ defmodule Elistrix.Dispatcher do
       _ ->
         requests = cmd.requests ++ [{:ok, get_time, cmd_name, delta}]
         |> prune_requests(cmd.thresholds)
-        update_in(state, [:commands, cmd_name, :requests], requests)
+
+        cmd = %{cmd | requests: requests}
+        put_in(state, [:commands, cmd_name], cmd)
     end
   end
 
@@ -118,7 +120,9 @@ defmodule Elistrix.Dispatcher do
       _ ->
         requests = cmd.requests ++ [{:error, get_time, cmd_name, delta}]
         |> prune_requests(cmd.thresholds)
-        update_in(state, [:commands, cmd_name, :requests], requests)
+
+        cmd = %{cmd | requests: requests}
+        update_in(state, [:commands, cmd_name], cmd)
     end
   end
 
