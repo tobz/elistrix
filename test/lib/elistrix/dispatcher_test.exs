@@ -1,5 +1,5 @@
 defmodule Elistrix.DispatcherTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   setup_all do
     dispatcher = Elistrix.Dispatcher.start_link(nil)
@@ -35,5 +35,10 @@ defmodule Elistrix.DispatcherTest do
 
     result = Elistrix.Dispatcher.run("square", [2])
     assert result == 4
+  end
+
+  test "cannot call nonexistent command" do
+    result = Elistrix.Dispatcher.run("fake_command", [1,2,3])
+    assert result == :does_not_exist
   end
 end

@@ -84,8 +84,29 @@ defmodule Elistrix.Dispatcher do
     GenServer.call(__MODULE__, {:run, cmd_name})
   end
 
-  defp get_command_status(_cmd) do
-    :ok
+  defp get_command_status(cmd) do
+    requests = cmd.requests |> prune_requests(cmd.thresholds)
+    totals = Enum.reduce(requests, {0, 0, 0, 0}, fn request, {count, latency, errors, successes} ->
+      {_, result, delta} = request
+
+      error_count = 0
+      success_count = 0
+      case result do
+        :error -> error_count = 1
+        :ok -> success_count = 1
+      end
+
+      {count + 1, latency + delta, errors + error_count, successes + success_count}
+    end)
+
+    {request_count, latency_total, error_count, success_count} = totals
+    case request_count do
+      0 -> :ok
+      _ ->
+        avg_latency = latency_total / request_count
+        error_percentage = error_count / request_count
+        :ok
+    end
   end
 
   defp track_success(cmd_name, delta) do
@@ -105,7 +126,7 @@ defmodule Elistrix.Dispatcher do
     case cmd do
       nil -> state
       _ ->
-        requests = cmd.requests ++ [{:ok, get_time, cmd_name, delta}]
+        requests = cmd.requests ++ [{get_time, :ok, delta}]
         |> prune_requests(cmd.thresholds)
 
         cmd = %{cmd | requests: requests}
@@ -118,11 +139,11 @@ defmodule Elistrix.Dispatcher do
     case cmd do
       nil -> state
       _ ->
-        requests = cmd.requests ++ [{:error, get_time, cmd_name, delta}]
+        requests = cmd.requests ++ [{get_time, :error, delta}]
         |> prune_requests(cmd.thresholds)
 
         cmd = %{cmd | requests: requests}
-        update_in(state, [:commands, cmd_name], cmd)
+        put_in(state, [:commands, cmd_name], cmd)
     end
   end
 
@@ -133,7 +154,7 @@ defmodule Elistrix.Dispatcher do
 
   defp _prune_requests(requests, ts) do
     case requests do
-      [{_, rts, _, _} | tail] when rts < ts -> _prune_requests(tail, ts)
+      [{rts, _, _} | tail] when rts < ts -> _prune_requests(tail, ts)
       _ -> requests
     end
   end
