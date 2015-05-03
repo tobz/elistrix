@@ -52,6 +52,9 @@ defmodule Elistrix.DispatcherTest do
     result = Elistrix.Dispatcher.run("error_threshold")
     assert result == :error
 
+    # wait for update cycle
+    :timer.sleep(500)
+
     result = Elistrix.Dispatcher.run("error_threshold")
     assert result == {:error, {:tripped, "exceeded error threshold"}}
   end
@@ -69,6 +72,9 @@ test "command gets tripped when latency threshold is exceeded" do
     result = Elistrix.Dispatcher.run("latency_threshold")
     assert result == :ok
 
+    # wait for update cycle
+    :timer.sleep(500)
+
     result = Elistrix.Dispatcher.run("latency_threshold")
     assert result == {:error, {:tripped, "exceeded latency threshold"}}
   end
@@ -81,6 +87,9 @@ test "command gets tripped when latency threshold is exceeded" do
 
     result = Elistrix.Dispatcher.run("expire")
     assert result == :error
+
+    # wait for update cycle
+    :timer.sleep(500)
 
     result = Elistrix.Dispatcher.run("expire")
     assert result == {:error, {:tripped, "exceeded error threshold"}}

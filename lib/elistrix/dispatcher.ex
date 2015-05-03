@@ -30,17 +30,16 @@ defmodule Elistrix.Dispatcher do
       false -> {:reply, :does_not_exist, state}
       true ->
         cmd = state.commands[cmd_name]
-        case get_command_status(cmd) do
-          {:tripped, reason} ->
-            cmd = %{cmd | :tripped => true}
-            put_in(state, [:commands, cmd_name], cmd)
+        case command_requires_update(cmd) do
+          true ->
+            cmd = update_command_status(cmd)
+            state = put_in(state, [:commands, cmd_name], cmd)
+          false -> true
+        end
 
-            {:reply, {:tripped, reason}, state}
-          :ok ->
-            cmd = %{cmd | :tripped => false}
-            put_in(state, [:commands, cmd_name], cmd)
-
-            {:reply, {:ok, cmd}, state}
+        case cmd.tripped do
+          true -> {:reply, {:tripped, cmd.trip_reason}, state}
+          false -> {:reply, {:ok, cmd}, state}
         end
     end
   end
@@ -92,9 +91,28 @@ defmodule Elistrix.Dispatcher do
     GenServer.call(__MODULE__, {:run, cmd_name})
   end
 
+  defp command_requires_update(cmd) do
+    cmd.last_updated_ms + 500 < get_time_msecs
+  end
+
+  defp update_command_status(cmd) do
+    cmd = %{cmd | requests: cmd.requests |> prune_requests(cmd.thresholds)}
+
+    status = get_command_status(cmd)
+    case status do
+      :ok ->
+        cmd = %{cmd | tripped: false}
+      {:tripped, reason} ->
+        cmd = %{cmd | tripped: true}
+        cmd = %{cmd | trip_reason: reason}
+    end
+
+    cmd = %{cmd | last_updated_ms: get_time_msecs}
+    cmd
+  end
+
   defp get_command_status(cmd) do
-    requests = cmd.requests |> prune_requests(cmd.thresholds)
-    totals = Enum.reduce(requests, {0, 0, 0, 0}, fn request, {count, latency, errors, successes} ->
+    totals = Enum.reduce(cmd.requests, {0, 0, 0, 0}, fn request, {count, latency, errors, successes} ->
       {_, result, delta} = request
 
       error_count = 0
