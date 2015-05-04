@@ -7,7 +7,7 @@ Modeled after [Hystrix](https://github.com/Netflix/Hystrix) but written in Elixi
 - simple interface to protect any function call in latency and error rate threshold mode
 - metrics collection to easily identify and inspect circuit breakers in real-time
 
-# general overflow
+# general overview
 
 Everything starts with registering a command with `Elistrix.Dispatcher`.  You must pass a function pointer i.e. `&Some.Module.function/2`.  You can optionally specify custom thresholds to change the following:
 - window length (the amount of time we'll keep a history of previous requests for the command)
