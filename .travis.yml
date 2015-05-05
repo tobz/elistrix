@@ -10,3 +10,8 @@ sudo: false
 env:
   - ELIXIR_ERL_OPTIONS=""
   - ELIXIR_ERL_OPTIONS="+T 9"
+
+after_script:
+  - mix coveralls.travis
+  - mix deps.get
+  - mix inch.report

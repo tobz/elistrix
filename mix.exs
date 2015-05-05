@@ -32,6 +32,8 @@ defmodule Elistrix.Mixfile do
   defp deps do
     [{:timex, "~> 0.13.4"},
      {:earmark, "~> 0.1.15", only: :dev},
-     {:ex_doc, "~> 0.7.2", only: :dev}]
+     {:ex_doc, "~> 0.7.2", only: :dev},
+     {:excoveralls, "~> 0.3", only: :dev},
+     {:inch_ex, only: :dev}]
   end
 end
