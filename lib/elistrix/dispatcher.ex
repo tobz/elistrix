@@ -1,3 +1,9 @@
+@moduledoc """
+Registers commands and dispatches calls to them.
+
+Currently, the dispatcher is also responsible for figuring out if a command's trip status is accurate
+(seeing if we've updated values recently enough) and updating it before call requests are fulfilled.
+"""
 defmodule Elistrix.Dispatcher do
   use GenServer
 

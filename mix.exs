@@ -5,7 +5,10 @@ defmodule Elistrix.Mixfile do
     [app: :elistrix,
      version: "0.0.1",
      elixir: "~> 1.0",
+     name: "Elistrix",
      description: description,
+     source_url: "https://github.com/tobz/elistrix",
+     homepage_url: "https://github.com/tobz/elistrix",
      package: package,
      deps: deps]
   end
@@ -27,6 +30,8 @@ defmodule Elistrix.Mixfile do
   end
 
   defp deps do
-    [{:timex, "~> 0.13.4"}]
+    [{:timex, "~> 0.13.4"},
+     {:earmark, "~> 0.1.15", only: :dev},
+     {:ex_doc, "~> 0.7.2", only: :dev}]
   end
 end
