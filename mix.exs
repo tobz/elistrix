@@ -10,7 +10,8 @@ defmodule Elistrix.Mixfile do
      source_url: "https://github.com/tobz/elistrix",
      homepage_url: "https://github.com/tobz/elistrix",
      package: package,
-     deps: deps]
+     deps: deps,
+     test_coverage: [tool: ExCoveralls]]
   end
 
   def application do
