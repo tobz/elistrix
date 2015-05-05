@@ -2,8 +2,8 @@
 
 [![Build Status](https://travis-ci.org/tobz/elistrix.svg?branch=master)](https://travis-ci.org/tobz/elistrix)
 [![Coverage Status](https://coveralls.io/repos/tobz/elistrix/badge.svg?branch=master)](https://coveralls.io/r/tobz/elistrix?branch=master)
-[![Docs Status](http://inch-ci.org/github/tobz/elistrix.svg?branch=master)](http://inch-ci.org/github/tobz/elistrix)
-[![Hex docs](http://img.shields.io/badge/hex.pm-docs-green.svg)](https://hexdocs.pm/elistrix)
+[![Docs Status](https://inch-ci.org/github/tobz/elistrix.svg?branch=master)](http://inch-ci.org/github/tobz/elistrix)
+[![Hex docs](https://img.shields.io/badge/hex.pm-docs-green.svg)](https://hexdocs.pm/elistrix)
 [![Current Release](https://img.shields.io/hexpm/v/elistrix.svg)](https://hex.pm/packages/elistrix)
 ![License MIT](https://img.shields.io/hexpm/l/elistrix.svg)
 
