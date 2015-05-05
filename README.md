@@ -1,4 +1,4 @@
-# elistrix
+# elistrix [![Build Status](https://travis-ci.org/tobz/elistrix.svg?branch=master)](https://travis-ci.org/tobz/elistrix)
 A latency / fault tolerance library to help isolate your applications from an uncertain world of slow or failed services.
 
 Modeled after [Hystrix](https://github.com/Netflix/Hystrix) but written in Elixir.
