@@ -26,8 +26,11 @@ defmodule Elistrix.Dispatcher do
     case Map.has_key?(state.commands, cmd_name) do
       true -> {:reply, :already_exists, state}
       false ->
-        cmd = %Elistrix.Command{fun: fun, thresholds: thresholds}
+        cmd = %Elistrix.Command{name: cmd_name, fun: fun, thresholds: thresholds}
         state = put_in(state, [:commands, cmd_name], cmd)
+
+        Elistrix.Metrics.register(cmd_name)
+
         {:reply, :ok, state}
     end
   end
@@ -52,10 +55,14 @@ defmodule Elistrix.Dispatcher do
   end
 
   def handle_cast({:track, :ok, cmd_name, delta}, state) do
+    Elistrix.Metrics.track_success(cmd_name, delta)
+
     {:noreply, mark_call_ok(state, cmd_name, delta)}
   end
 
   def handle_cast({:track, :error, cmd_name, delta}, state) do
+    Elistrix.Metrics.track_error(cmd_name, delta)
+
     {:noreply, mark_call_error(state, cmd_name, delta)}
   end
 
@@ -108,10 +115,16 @@ defmodule Elistrix.Dispatcher do
     status = get_command_status(cmd)
     case status do
       :ok ->
-        cmd = %{cmd | tripped: false}
+        if cmd.tripped do
+          cmd = %{cmd | tripped: false}
+          Elistrix.Metrics.track_command_reset(cmd.name)
+        end
       {:tripped, reason} ->
-        cmd = %{cmd | tripped: true}
-        cmd = %{cmd | trip_reason: reason}
+        if !cmd.tripped do
+          cmd = %{cmd | tripped: true}
+          cmd = %{cmd | trip_reason: reason}
+          Elistrix.Metrics.track_command_tripped(cmd.name)
+        end
     end
 
     cmd = %{cmd | last_updated_ms: get_time_msecs}

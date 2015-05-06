@@ -1,15 +1,6 @@
 defmodule Elistrix.DispatcherTest do
   use ExUnit.Case, async: true
 
-  setup_all do
-    dispatcher = Elistrix.Dispatcher.start_link
-    {:ok, dispatcher: dispatcher}
-  end
-
-  test "can create dispatcher", context do
-    assert context[:dispatcher] != nil
-  end
-
   test "can register new command" do
     fun = fn a -> a * 2 end
 

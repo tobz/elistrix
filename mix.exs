@@ -15,7 +15,7 @@ defmodule Elistrix.Mixfile do
   end
 
   def application do
-    [applications: [],
+    [applications: [:folsom],
      mod: {Elistrix, []}]
   end
 
@@ -32,6 +32,7 @@ defmodule Elistrix.Mixfile do
 
   defp deps do
     [{:timex, "~> 0.13.4"},
+     {:folsom, git: "https://github.com/boundary/folsom.git"},
      {:earmark, "~> 0.1.15", only: :dev},
      {:ex_doc, "~> 0.7.2", only: :dev},
      {:excoveralls, "~> 0.3", only: :dev},

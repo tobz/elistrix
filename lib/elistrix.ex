@@ -8,6 +8,7 @@ defmodule Elistrix do
     import Supervisor.Spec, warn: false
 
     children = [
+      worker(Elistrix.Metrics, [[name: @metrics_name]]),
       worker(Elistrix.Dispatcher, [[name: @dispatcher_name]])
     ]
 
