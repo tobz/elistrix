@@ -101,7 +101,7 @@ defmodule Elistrix.Metrics do
 
   defp get_metric_values(metric_names) do
     metric_names |> Enum.map(fn name ->
-      {_, info} = :folsom_metrics.get_metric_info(name)
+      [{_, info}] = :folsom_metrics.get_metric_info(name)
       case info[:type] do
         :counter -> {name, :folsom_metrics.get_metric_value(name)}
         :gauge -> {name, :folsom_metrics.get_metric_value(name)}
