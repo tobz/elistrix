@@ -28,6 +28,6 @@ defmodule ElistrixTest.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:elistrix, "~> 0.0.1"},{:httpoison, "~> 0.6"}]
+    [{:elistrix, "~> 0.0.3"},{:folsom, git: "https://github.com/boundary/folsom.git"},{:httpoison, "~> 0.6"}]
   end
 end

@@ -1,6 +1,9 @@
-%{"elistrix": {:hex, :elistrix, "0.0.1"},
+%{"bear": {:git, "git://github.com/boundary/bear.git", "119234548783af19b8ec75c879c5062676b92571", [tag: "0.8.2"]},
+  "elistrix": {:hex, :elistrix, "0.0.3"},
+  "folsom": {:git, "https://github.com/boundary/folsom.git", "8914823067c623d2839ecd6d17785ba94ad004c8", []},
   "hackney": {:hex, :hackney, "1.1.0"},
   "httpoison": {:hex, :httpoison, "0.6.2"},
   "idna": {:hex, :idna, "1.0.2"},
+  "meck": {:git, "git://github.com/eproxus/meck", "dde759050eff19a1a80fd854d7375174b191665d", [tag: "0.8.2"]},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.4"},
   "timex": {:hex, :timex, "0.13.4"}}

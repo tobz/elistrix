@@ -14,8 +14,6 @@ defmodule ElistrixTest.Worker do
 
   def handle_info({:call}, state) do
     result = Elistrix.Dispatcher.run("remote_service", [:random.uniform(100)])
-    IO.inspect result
-
     {:noreply, state}
   end
 end
