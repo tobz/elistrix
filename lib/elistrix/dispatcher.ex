@@ -145,7 +145,7 @@ defmodule Elistrix.Dispatcher do
       {count + 1, latency + delta, errors + error_count, successes + success_count}
     end)
 
-    {request_count, latency_total, error_count, success_count} = totals
+    {request_count, latency_total, error_count, _success_count} = totals
     case request_count do
       0 -> :ok
       _ ->
